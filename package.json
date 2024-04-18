@@ -1,0 +1,33 @@
+{
+  "name": "vite-plugin-mpg",
+  "version": "0.0.1",
+  "description": "vite multi pages plugin",
+  "main": "index.js",
+  "files": [
+    "utils",
+    "index.js"
+  ],
+  "exports": {
+    ".": {
+      "require": "./index.js",
+      "import": "./index.js"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/just-ads/vite-plugin-multi-page.git"
+  },
+  "keywords": [
+    "vite-plugin",
+    "multi-page"
+  ],
+  "author": "ADS <2934970779@qq.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/just-ads/vite-plugin-multi-page/issues"
+  },
+  "homepage": "https://github.com/just-ads/vite-plugin-multi-page#readme"
+}
