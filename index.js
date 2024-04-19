@@ -125,6 +125,8 @@ export default function vitePluginMultiPage(userOptions) {
                     res.write(injectToHtml(html, `<script type="module" src="${to}"></script>`), 'utf-8');
                     res.end()
                     return;
+                } else if (to) {
+                    req.url = to;
                 }
                 next();
             })
