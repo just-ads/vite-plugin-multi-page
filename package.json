@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-mpg",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "vite multi pages plugin",
   "main": "index.js",
   "type": "module",
