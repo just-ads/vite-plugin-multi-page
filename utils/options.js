@@ -1,14 +1,30 @@
-import path from "node:path";
-import fs from 'node:fs'
+import $path from "node:path";
+import $fs from 'node:fs'
+
+const supportedProfiles = ['pages.config.json']
+
 
 export function getOptions(root) {
-    const p = path.join(root, 'pages.config.json');
-    if(fs.existsSync(p)) {
-        try {
-            return JSON.parse(fs.readFileSync(p, 'utf-8'))
-        } catch (e) {
-            throw new Error(`p not found`)
+    const file = getOptionsFile(root);
+    if(!file){
+        throw Error(`not found configuration file, support ${supportedProfiles.join(',')}`)
+    }
+    let options;
+    try {
+        options = JSON.parse($fs.readFileSync(file, 'utf-8'))
+    } catch (e) {
+        throw Error(`invalid configuration file`)
+    }
+    return {
+        file,
+        options
+    }
+}
+
+export function getOptionsFile(root) {
+    for (const f of supportedProfiles) {
+        if ($fs.existsSync($path.join(root, f))) {
+            return f
         }
     }
-    return {}
 }

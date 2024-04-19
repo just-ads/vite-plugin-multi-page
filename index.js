@@ -43,8 +43,11 @@ function injectToHtml(html, tags) {
 
 export default function vitePluginMultiPage(userOptions) {
     const root = normalizePath(process.cwd());
+    let configFile;
     if (!userOptions) {
-        userOptions = getOptions(root)
+        const {file, options} = getOptions(root);
+        userOptions = options;
+        configFile = file;
     }
     checkPages(userOptions.pages);
     let {template, pages} = userOptions;
@@ -79,6 +82,9 @@ export default function vitePluginMultiPage(userOptions) {
             config.build.rollupOptions = config.build.rollupOptions || {};
             config.build.rollupOptions.input = pages.map(page => page.file);
             config.server = config.server || {};
+        },
+        configResolved(config) {
+            configFile && config.configFileDependencies.push(normalizePath(configFile));
         },
         resolveId(source, importer, options) {
             // 处理入口不是html的配置
