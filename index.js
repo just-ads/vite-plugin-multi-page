@@ -1,40 +1,11 @@
 import $path from 'node:path';
 import $fs from 'node:fs';
-import {getOptions} from "./utils/options.js";
-import {checkPages, createRuleList, getSource} from "./utils/index.js";
 import {normalizePath} from "vite";
 import {parse, serialize} from "parse5";
 
-function writeFile(name, content) {
-    if ($fs.existsSync(name)) {
-        $fs.unlinkSync(name)
-    }
-    $fs.writeFileSync(name, content)
-}
-
-function deleteEmptyFoldersRecursively(folderPath) {
-    if (!$fs.existsSync(folderPath)) {
-        return;
-    }
-    const files = $fs.readdirSync(folderPath);
-    if (files.length === 0) {
-        $fs.rmdirSync(folderPath);
-        return;
-    }
-
-    files.forEach((file) => {
-        const filePath = $path.join(folderPath, file);
-        if ($fs.statSync(filePath).isDirectory()) {
-            deleteEmptyFoldersRecursively(filePath);
-        }
-    });
-
-    // Check if the folder is empty after deleting its subfolders
-    const remainingFiles = $fs.readdirSync(folderPath);
-    if (remainingFiles.length === 0) {
-        $fs.rmdirSync(folderPath);
-    }
-}
+import {getOptions} from "./utils/options.js";
+import {checkPages, createRuleList} from "./utils/utils.js";
+import {deleteEmptyFoldersRecursively, getSource, writeFile} from "./utils/file.js";
 
 function traverseNodes(node, visitor) {
     visitor(node);
@@ -110,10 +81,14 @@ export default function vitePluginMultiPage(userOptions) {
             config.server = config.server || {};
         },
         resolveId(source, importer, options) {
+            // 处理入口不是html的配置
             if (!source.endsWith('.html') && !importer && options.isEntry) {
                 const page = getPage(source);
                 if (!page) return;
                 const temp = page.template || template;
+                if(!temp){
+                    throw Error(`${page.path}: template is required when if the entry of the page is not html, you maybe should configure the template in configuration`);
+                }
                 const id = normalizePath($path.join(root, getPagePath(page)));
                 const folder = $path.dirname(id);
 
@@ -128,6 +103,7 @@ export default function vitePluginMultiPage(userOptions) {
             if (processedHtml.has(id)) {
                 const info = processedHtml.get(id);
                 const template = getSource($path.join(root, info.template));
+                // 把入口注入到模板文件中
                 return injectToHtml(template, `<script type="module" src="${info.entry}"></script>`);
             }
         },

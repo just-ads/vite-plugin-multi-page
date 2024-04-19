@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "vite multi pages plugin",
   "main": "index.js",
+  "type": "module",
   "files": [
     "utils",
     "index.js"
@@ -14,7 +15,7 @@
     }
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepublish": "npm version minor"
   },
   "repository": {
     "type": "git",
@@ -29,5 +30,12 @@
   "bugs": {
     "url": "https://github.com/just-ads/vite-plugin-multi-page/issues"
   },
-  "homepage": "https://github.com/just-ads/vite-plugin-multi-page#readme"
+  "homepage": "https://github.com/just-ads/vite-plugin-multi-page#readme",
+  "devDependencies": {
+    "rollup": "^4.14.3"
+  },
+  "dependencies": {
+    "parse5": "^7.1.2",
+    "vite": "^5.2.9"
+  }
 }
