@@ -55,6 +55,8 @@ export default function vitePluginMultiPage(userOptions) {
         template = '/index.html';
     }
 
+    let resolveConfig;
+
 
     const getPage = (filename) => {
         filename = filename.startsWith('/') ? filename.substring(1) : filename;
@@ -69,6 +71,8 @@ export default function vitePluginMultiPage(userOptions) {
         const path = (page.path === '/' ? '/index' : page.path) + '.html';
         return normalizePath($path.relative('/', path))
     }
+
+    const getProjectFiles = id => normalizePath($path.join(resolveConfig.root, id))
 
     const ruleList = createRuleList(pages, template);
     const processedHtml = new Map();
@@ -85,6 +89,7 @@ export default function vitePluginMultiPage(userOptions) {
         },
         configResolved(config) {
             configFile && config.configFileDependencies.push(normalizePath(configFile));
+            resolveConfig = config;
         },
         resolveId(source, importer, options) {
             // 处理入口不是html的配置
@@ -95,12 +100,12 @@ export default function vitePluginMultiPage(userOptions) {
                 if (!temp) {
                     throw Error(`${page.path}: template is required when if the entry of the page is not html, you maybe should configure the template in configuration`);
                 }
-                const id = normalizePath($path.join(root, getPagePath(page)));
+                const id = getProjectFiles(getPagePath(page));
                 const folder = $path.dirname(id);
 
                 processedHtml.set(id, {
                     template: temp,
-                    entry: normalizePath($path.relative(folder, $path.join(root, source)))
+                    entry: $path.relative(folder, getProjectFiles(source))
                 });
                 return id;
             }
@@ -108,7 +113,7 @@ export default function vitePluginMultiPage(userOptions) {
         load(id) {
             if (processedHtml.has(id)) {
                 const info = processedHtml.get(id);
-                const template = getSource($path.join(root, info.template));
+                const template = getSource(getProjectFiles(info.template));
                 // 把入口注入到模板文件中
                 return injectToHtml(template, `<script type="module" src="${info.entry}"></script>`);
             }
@@ -127,7 +132,7 @@ export default function vitePluginMultiPage(userOptions) {
                     }
                 }
                 if (to && !to.endsWith('.html') && template) {
-                    const html = getSource($path.join(root, template));
+                    const html = getSource(getProjectFiles(template));
                     res.write(injectToHtml(html, `<script type="module" src="${to}"></script>`), 'utf-8');
                     res.end()
                     return;
@@ -152,7 +157,7 @@ export default function vitePluginMultiPage(userOptions) {
             chunks.forEach(({fileName, source}) => {
                 const page = getPage(fileName);
                 if (!page) return;
-                const filepath = normalizePath($path.join(outPath, fileName));
+                const filepath = getProjectFiles(fileName);
                 const path = getPagePath(page);
                 const newFilepath = normalizePath($path.join(outPath, path));
                 if (filepath === newFilepath) return;
