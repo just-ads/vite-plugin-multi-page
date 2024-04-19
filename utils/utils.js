@@ -25,20 +25,15 @@ export function checkPages(pages) {
     }
 }
 
-export function createRuleList(pages) {
+export function createRuleList(pages, template) {
     const ruleList = [];
     pages.forEach(page => {
         const p = page.path.startsWith('/') ? page.path.substring(1) : page.path;
         ruleList.push({
             from: `^/${p}$`,
-            to: page.file
+            to: page.file,
+            template: page.template || template
         });
-        if (!p) {
-            ruleList.push({
-                from: `^/index$`,
-                to: page.file
-            });
-        }
     });
     return ruleList
 }

@@ -67,7 +67,7 @@ export default function vitePluginMultiPage(userOptions) {
         return normalizePath($path.relative('/', path))
     }
 
-    const ruleList = createRuleList(pages);
+    const ruleList = createRuleList(pages, template);
     const processedHtml = new Map();
 
 
@@ -86,7 +86,7 @@ export default function vitePluginMultiPage(userOptions) {
                 const page = getPage(source);
                 if (!page) return;
                 const temp = page.template || template;
-                if(!temp){
+                if (!temp) {
                     throw Error(`${page.path}: template is required when if the entry of the page is not html, you maybe should configure the template in configuration`);
                 }
                 const id = normalizePath($path.join(root, getPagePath(page)));
@@ -111,12 +111,20 @@ export default function vitePluginMultiPage(userOptions) {
             server.middlewares.use((req, res, next) => {
                 let url = req.url.split('.')[0];
                 url = url.split('?')[0];
+                let to, template;
                 for (let i = 0; i < ruleList.length; i++) {
                     const rule = ruleList[i];
                     if (url.match(rule.from)) {
-                        req.url = rule.to;
+                        to = rule.to;
+                        template = rule.template
                         break;
                     }
+                }
+                if (to && !to.endsWith('.html') && template) {
+                    const html = getSource($path.join(root, template));
+                    res.write(injectToHtml(html, `<script type="module" src="${to}"></script>`), 'utf-8');
+                    res.end()
+                    return;
                 }
                 next();
             })
