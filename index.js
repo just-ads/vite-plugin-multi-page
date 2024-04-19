@@ -157,7 +157,7 @@ export default function vitePluginMultiPage(userOptions) {
             chunks.forEach(({fileName, source}) => {
                 const page = getPage(fileName);
                 if (!page) return;
-                const filepath = getProjectFiles(fileName);
+                const filepath = normalizePath($path.join(outPath, fileName));
                 const path = getPagePath(page);
                 const newFilepath = normalizePath($path.join(outPath, path));
                 if (filepath === newFilepath) return;
